@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  path {
+    stroke: #fff;
+    fill-rule: evenodd;
+  }
+
+  text {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+  }
+</style>
+
+<body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+
+<script>
+  var width = 1260,
+      height = 1250,
+      radius = Math.min(width, height-50) / 2;
+
+  var x = d3.scale.linear()
+      .range([0, 2 * Math.PI]);
+
+  var y = d3.scale.linear()
+      .range([0, radius]);
+
+  var color = d3.scale.category20c();
+
+  var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+
+  var partition = d3.layout.partition()
+      .value(function(d) {
+        return d.size;
+      });
+
+  var arc = d3.svg.arc()
+      .startAngle(function(d) {
+        return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
+      })
+      .endAngle(function(d) {
+        return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
+      })
+      .innerRadius(function(d) {
+        return Math.max(0, y(d.y));
+      })
+      .outerRadius(function(d) {
+        return Math.max(0, y(d.y + d.dy));
+      });
+
+
+  var g = svg.selectAll("g")
+      .data(partition.nodes(getData()))
+      .enter().append("g");
+
+  var path = g.append("path")
+      .attr("d", arc)
+      .style("fill", function(d) {
+        return color((d.children ? d : d.parent).name);
+      })
+      .on("click", click);
+
+  var text = g.append("text")
+      .attr("transform", function(d) {
+        return "rotate(" + computeTextRotation(d) + ")";
+      })
+      .attr("x", function(d) {
+        return y(d.y);
+      })
+      .attr("dx", "6") // margin
+      .attr("dy", ".35em") // vertical-align
+      .text(function(d) {
+        return d.name;
+      });
+
+  function click(d) {
+    // fade out all text elements
+    text.transition().attr("opacity", 0);
+
+    path.transition()
+        .duration(750)
+        .attrTween("d", arcTween(d))
+        .each("end", function(e, i) {
+          // check if the animated element's data e lies within the visible angle span given in d
+          if (e.x >= d.x && e.x < (d.x + d.dx)) {
+            // get a selection of the associated text element
+            var arcText = d3.select(this.parentNode).select("text");
+            // fade in the text element and recalculate positions
+            arcText.transition().duration(750)
+                .attr("opacity", 1)
+                .attr("transform", function() {
+                  return "rotate(" + computeTextRotation(e) + ")"
+                })
+                .attr("x", function(d) {
+                  return y(d.y);
+                });
+          }
+        });
+  }
+
+  d3.select(self.frameElement).style("height", height + "px");
+
+  // Interpolate the scales!
+  function arcTween(d) {
+    var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+        yd = d3.interpolate(y.domain(), [d.y, 1]),
+        yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+    return function(d, i) {
+      return i ? function(t) {
+        return arc(d);
+      } : function(t) {
+        x.domain(xd(t));
+        y.domain(yd(t)).range(yr(t));
+        return arc(d);
+      };
+    };
+  }
+
+  function computeTextRotation(d) {
+    return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
+  }
+
+  function getData() {
+    return {
+      "name": "MelbourneCup-2019",
+      "children": [{
+        "name": "Race 1 1000m",
+        "size": 1000,
+        "children": [{
+            "name": "1 Amorosity",
+            "size": 300
+			
+          },{
+            "name": "2 Aryaaf",
+            "size": 300,
+            
+          }, {
+            "name": "3 Cut It Out",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				"children": [{
+                "name": "speed / distance",
+                "size": 300
+              },]
+              },]
+            
+          }, {
+            "name": "5 Hard Rock Girl",
+            "size": 300,
+            
+          }, {
+            "name": "6 La Girl",
+            "size": 300,
+            
+          }, {
+            "name": "7 Marchena",
+            "size": 300,
+            "children": [{
+                "name": "0",
+                "size": 300,
+				"children": [{
+                "name": "betfair",
+                "size": 300
+              },]
+              },]
+          }, {
+            "name": "8 Muntaseera",
+            "size": 300,
+            "children": [{
+                "name": "1",
+                "size": 300,
+				"children": [{
+                "name": "expert tips",
+                "size": 300
+              },]
+              },]
+          }, {
+            "name": "9 Old Kent Road",
+            "size": 300,
+            
+          }, {
+            "name": "10 Sly Cicada",
+            "size": 300,
+            
+          }, {
+            "name": "11 Sotirio",
+            "size": 300,
+            
+          },{
+            "name": "12 Sunflare",
+            "size": 300,			
+            
+          }, {
+            "name": "13 Thala",
+            "size": 100,            
+			},{
+            "name": "14 Unblushing",
+            "size": 300,
+            
+          },{
+            "name": "15 Wild Cherry Road",
+            "size": 300,
+            
+          },{
+            "name": "16 Write The Score",
+            "size": 300,
+            "children": [{
+                "name": "3",
+                "size": 300,
+				"children": [{
+                "name": "betfair",
+                "size": 300
+              },]
+              },]
+          },]
+      }, {
+        "name": "Race 10 1400m",
+        "size": 1400,
+        "children": [{
+            "name": "1. Ready Set Sail",
+            "size": 300,            
+
+          },{
+            "name": "2. Akari",
+            "size": 300,
+			"children": [{
+                "name": "4",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "3. Done By Me",
+            "size": 300,
+            
+          }, {
+            "name": "4. Pretty Brazen",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "5. Xilong",
+            "size": 300,
+			"children": [{
+                "name": "1",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "6. Betcha Flying",
+            "size": 300,
+			"children": [{
+                "name": "2",
+                "size": 200,
+				
+              },]
+            
+          }, {
+            "name": "7. Deserved",
+            "size": 300,
+			
+          }, {
+            "name": "8. Excused",
+            "size": 300,
+            
+          }, {
+            "name": "9. Mayaaseh",
+            "size": 300,
+            
+          }, {
+            "name": "10. Splendoronthegrass",
+            "size": 300,
+		
+          },{
+            "name": "11. California Salto",
+            "size": 300,
+            
+          }, {
+            "name": "13. Wild Vixen",
+            "size": 300,
+			"children": [{
+                "name": "1",
+                "size": 300,
+				
+              },]
+            
+          },  {
+            "name": "15. Charleise",
+            "size": 300,
+            
+          }, {
+            "name": "16. Debt'n'deficit",
+            "size": 300,
+            
+          }, {
+            "name": "17. Flandersrain",
+            "size": 300,
+            
+          }, {
+            "name": "18. It's Kind Of Magic",
+            "size": 300,
+            
+          }, {
+            "name": "19. Affair to Remember",
+            "size": 300,
+            
+          },{
+            "name": "20. Night Express",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 9 1200m",
+        "size": 1200,
+        "children": [{
+            "name": "1. Royal Symphony",
+            "size": 300,
+            "children": [{
+                "name": "3",
+                "size": 300,
+				"children": [{
+                "name": "active tippers",
+                "size": 300
+              },]
+              },]
+
+          },{
+            "name": "2. Tactical Advantage",
+            "size": 300,
+			"children": [{
+                "name": "1",
+                "size": 300,
+				"children": [{
+                "name": "speed",
+                "size": 300
+              },]
+              },]
+            
+          }, {
+            "name": "3. Haunted",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "4. Milwaukee",
+            "size": 300,
+            
+          }, {
+            "name": "5. Intuition",
+            "size": 300,			
+            
+          }, {
+            "name": "6. Parsifal",
+            "size": 300,
+			"children": [{
+                "name": "2",
+                "size": 200,
+				
+              },]
+            
+          }, {
+            "name": "7. Runson",
+            "size": 300,
+            
+          }, {
+            "name": "9. Crown Fontein",
+            "size": 300,
+            
+          }, {
+            "name": "10. Smart Coupe",
+            "size": 300,
+            
+          }, {
+            "name": "11. Holbien",
+            "size": 300,
+            
+          },{
+            "name": "12. Lagerfeld",
+            "size": 300,
+            
+          }, {
+            "name": "13. More Than Exceed",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 8 1800m",
+        "size": 1800,
+        "children": [{
+            "name": "1. Moss 'n' Dale",
+            "size": 300,            
+
+          },{
+            "name": "2. Yulong Prince",
+            "size": 300,
+            
+          }, {
+            "name": "4. Kiwia",
+            "size": 300,
+			"children": [{
+                "name": "4",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "5. Runaway",
+            "size": 300,			
+          }, {
+            "name": "6. Plein Ciel",
+            "size": 300,
+            
+          }, {
+            "name": "8. So You Win",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				"children": [{
+                "name": "distance",
+                "size": 300
+              },]
+              },]
+            
+          }, {
+            "name": "9. Super Titus",
+            "size": 300,			
+            
+          }, {
+            "name": "10. Kaonic",
+            "size": 300,
+            
+          }, {
+            "name": "11. Looks Like Elvis",
+            "size": 300,
+            "children": [{
+                "name": "2",
+                "size": 200,
+				
+              },]
+          }, {
+            "name": "12. Second Bullet",
+            "size": 300,
+            
+          },{
+            "name": "14. Red Alto",
+            "size": 300,
+            
+          }, {
+            "name": "15. A Shin Rook",
+            "size": 300,
+            
+          }, {
+            "name": "17. Junipal",
+            "size": 300,
+				"children": [{
+                "name": "1",
+                "size": 300,
+				
+              },]
+            
+          }, ]
+      }, {
+        "name": "Race 7 3200m",
+        "size": 3200,
+        "children": [{
+            "name": "1. Cross Counter",
+            "size": 300,      
+	"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]			
+
+          },{
+            "name": "2. Mer De Glace",
+            "size": 300,		
+            
+          }, {
+            "name": "3. Master Of Reality",
+            "size": 300,
+            
+          }, {
+            "name": "4. Mirage Dancer",
+            "size": 300,
+            
+          }, {
+            "name": "5. Southern France",
+            "size": 300,
+            
+          }, {
+            "name": "6. Hunting Horn",
+            "size": 300,
+            
+          }, {
+            "name": "7. Latrobe",
+            "size": 300,
+            
+          }, {
+            "name": "8. Mustajeer",
+            "size": 300,
+            
+          }, {
+            "name": "9. Rostropovich",
+            "size": 300,			
+            
+          }, {
+            "name": "10. Twilight Payment",
+            "size": 300,		
+            
+          },{
+            "name": "11. Finche",
+            "size": 300,		
+            	"children": [{
+                "name": "2",
+                "size": 300,
+				
+              },]
+          }, {
+            "name": "12. Prince Of Arran",
+            "size": 300,
+            
+          }, {
+            "name": "13. Raymond Tusk",
+            "size": 300,
+            
+          }, {
+            "name": "14. Downdraft",
+            "size": 300,
+            	"children": [{
+                "name": "4",
+                "size": 300,
+				
+              },]
+          }, {
+            "name": "15. Magic Wand",
+            "size": 300,
+            
+          }, {
+            "name": "16. Neufbosc",
+            "size": 300,
+            
+          }, {
+            "name": "17. Sound",
+            "size": 300,			
+            
+          }, {
+            "name": "18. Surprise Baby",
+            "size": 300,
+            
+          }, {
+            "name": "19. Constantinople",
+            "size": 300,
+				"children": [{
+                "name": "1",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "20. Il Paradiso",
+            "size": 300,
+            	"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]
+          }, {
+            "name": "21. Steel Prince",
+            "size": 300,
+            
+          },{
+            "name": "22. The Chosen One",
+            "size": 300,
+            
+          }, {
+            "name": "23. Vow And Declare",
+            "size": 300,
+            
+          }, {
+            "name": "24. Youngstar",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 6 1400m",
+        "size": 1400,
+        "children": [{
+            "name": "1. Jamaican Rain",
+            "size": 300,     
+	"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]			
+
+          },{
+            "name": "2. Teleplay",
+            "size": 300,		
+            
+          }, {
+            "name": "3. Bella Martini",
+            "size": 300,
+	            
+          }, {
+            "name": "4. Sweet Scandal",
+            "size": 300,
+			"children": [{
+                "name": "1",
+                "size": 100,
+				
+              },]
+            
+          }, {
+            "name": "5. Kings Brook",
+            "size": 300,
+            
+          }, {
+            "name": "6. River Jewel",
+            "size": 300,
+            
+          }, {
+            "name": "7. Into the Abyss",
+            "size": 300,
+            
+          }, {
+            "name": "8. La Tigeresa",
+            "size": 300,
+            	"children": [{
+                "name": "4",
+                "size": 300,
+				
+              },]
+          },{
+            "name": "9. Victory Kingdom",
+            "size": 300,
+            	"children": [{
+                "name": "2",
+                "size": 300,
+				
+              },]
+          }, {
+            "name": "10. Dunbrody Power",
+            "size": 300,
+		
+            
+          }, {
+            "name": "11. Miss Belisa",
+            "size": 300,
+            
+          }, {
+            "name": "12. Gina's Hope",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 5 1000m",
+        "size": 1000,
+        "children": [{
+            "name": "1. Mclaren",
+            "size": 300,            
+
+          },{
+            "name": "2. Hawker Hurricane",
+            "size": 300,			
+            
+          }, {
+            "name": "3. Can't Be Done",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "4. Garner",
+            "size": 300,
+            "children": [{
+                "name": "2",
+                "size": 300,
+				"children": [{
+                "name": "speed",
+                "size": 300
+              },]
+              },]
+          }, {
+            "name": "5. Santorini Summer",
+            "size": 300,
+            
+          }, {
+            "name": "6. Asateer",
+            "size": 300,			
+            
+          }, {
+            "name": "7. Espinola",
+            "size": 300,			
+            
+          }, {
+            "name": "9. Young Liam",
+            "size": 300,
+            
+          }, {
+            "name": "10. Optimizzer",
+            "size": 300,
+            
+          }, {
+            "name": "11. Valley Of Hearts",
+            "size": 300,
+            
+          },{
+            "name": "12. Little Rich Boy",
+            "size": 300,
+            
+          }, {
+            "name": "13. Sanbuck",
+            "size": 300,
+            
+          },{
+            "name": "14. Athiri",
+            "size": 300,
+			"children": [{
+                "name": "1",
+                "size": 300,				
+              },]
+            
+          },{
+            "name": "15. Hearty Lass",
+            "size": 300,
+            
+          }, {
+            "name": "16. Sizzlefly",
+            "size": 300,
+            "children": [{
+                "name": "3",
+                "size": 100
+              },]
+          },{
+            "name": "17. Varda",
+            "size": 300,
+            
+          },{
+            "name": "18. Flostar",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 2 1400m",
+        "size": 1400,
+        "children": [{
+            "name": "1 William Thomas",
+            "size": 300,     
+			"children": [{
+                "name": "2",
+                "size": 300,
+				"children": [{
+                "name": "Machine Learning",
+                "size": 300
+              },]
+              },]
+
+          },{
+            "name": "2. Al Passem",
+            "size": 300,
+            
+          }, {
+            "name": "3. Bravo Tango",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				"children": [{
+                "name": "active tippers",
+                "size": 300
+              },]
+              },]
+            
+          }, {
+            "name": "4. Bad Wolf",
+            "size": 300,			
+            
+          }, {
+            "name": "5. East Indiaman",
+            "size": 300,
+            "children": [{
+                "name": "4",
+                "size": 200
+              },]
+          }, {
+            "name": "6. Reflectivity",
+            "size": 300,
+            
+          }, {
+            "name": "7. Phaistos",
+            "size": 300,
+			"children": [{
+                "name": "1",
+                "size": 200
+              },]
+            
+          }, {
+            "name": "8. Yeldarb",
+            "size": 300,
+            
+          }, {
+            "name": "9. Secret Vega",
+            "size": 300,
+            
+          },{
+            "name": "10. Fergus Magergus",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 3 1700m",
+        "size": 1700,
+        "children": [{
+            "name": "1. Etana",
+            "size": 300,           
+
+          },{
+            "name": "2. One More Try",
+            "size": 300,
+            "children": [{
+                "name": "4",
+                "size": 300,
+				
+              },]
+          }, {
+            "name": "3. Sheezdashing",
+            "size": 300,			
+            
+          }, {
+            "name": "4. Aliferous",
+            "size": 300,
+            
+          }, {
+            "name": "5. Aristocratic Miss",
+            "size": 300,
+            
+          }, {
+            "name": "6. Romani Girl",
+            "size": 300,
+            "children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]
+          }, {
+            "name": "7. Sure Knee",
+            "size": 300,
+             "children": [{
+                "name": "1",
+                "size": 300,
+				"children": [{
+                "name": "Machine Learning",
+                "size": 300
+              },]
+              },]
+          }, {
+            "name": "7. Sure Knee",
+            "size": 300,
+            
+          }, {
+            "name": "8. Temple of Bel",
+            "size": 300,			
+            
+          },{
+            "name": "9. Moor Gait",
+            "size": 300,
+            
+          }, {
+            "name": "10. Seewhatshebrings",
+            "size": 300,
+			"children": [{
+                "name": "2",
+                "size": 100,
+				
+              },]
+            
+          }, {
+            "name": "11. Maracaibo",
+            "size": 300,			
+            
+          }, {
+            "name": "12. Nordic Symphony",
+            "size": 300,			
+            
+          }, {
+            "name": "13. Extreme Pride",
+            "size": 300,
+            
+          }, {
+            "name": "14. Shrouded in Mist",
+            "size": 300,
+            
+          },{
+            "name": "15. Camelle",
+            "size": 300,
+            
+          }, {
+            "name": "16. Linguist",
+            "size": 300,
+            
+          }, ]
+      }, {
+        "name": "Race 4 2800m",
+        "size": 2800,
+        "children": [{
+            "name": "1. Big Blue",
+            "size": 300,
+
+          },{
+            "name": "2. Sin to Win",
+            "size": 300,
+            
+          }, {
+            "name": "3. Shared Ambition",
+            "size": 300,
+            "children": [{
+                "name": "1",
+                "size": 300,
+				"children": [{
+                "name": "sure ML",
+                "size": 300
+              },]
+              },]
+          }, {
+            "name": "4. Kapour",
+            "size": 300,
+			
+            
+          }, {
+            "name": "5. Exemplar",
+            "size": 300,
+			"children": [{
+                "name": "3",
+                "size": 300,
+				
+              },]
+            
+          }, {
+            "name": "6. Etah James",
+            "size": 300,
+            
+          }, {
+            "name": "7. Gayatri",
+            "size": 300,
+			"children": [{
+                "name": "2",
+                "size": 300,
+				"children": [{
+                "name": "distance",
+                "size": 300
+              },]
+              },]
+            
+          }, {
+            "name": "8. Creedence",
+            "size": 300,
+            
+          }, {
+            "name": "9. Franked",
+            "size": 100,			
+            
+          }, {
+            "name": "10. Serenade the Stars",
+            "size": 200,			
+            
+          },{
+            "name": "12. Alienated",
+            "size": 300,
+			
+            
+          }, {
+            "name": "13. Kentucky Diva",
+            "size": 300,
+			"children": [{
+                "name": "4",
+                "size": 200,
+				
+              },]
+            
+          }, {
+            "name": "14. Latin Beat",
+            "size": 300,
+            
+          }, ]
+      }, ]
+    }
+
+  }
+</script>
